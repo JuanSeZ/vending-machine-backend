@@ -1,6 +1,6 @@
-import {Repository} from "@domains/repository";
+import {Repository} from "./repository";
 import { PrismaClient } from "@prisma/client";
-import {CreateProductDto, ProductDto, VendingMachineDto} from "@domains/dto";
+import {CreateProductDto, ProductDto, VendingMachineDto} from "./dto";
 
 export class RepositoryImpl implements Repository {
     constructor(private readonly db: PrismaClient ) {}
@@ -41,4 +41,15 @@ export class RepositoryImpl implements Repository {
         return Promise.resolve(null);
     }
 
+    async createVendingMachine(name: string): Promise<VendingMachineDto> {
+        const vendingMachine = await this.db.vendingMachine.create({
+            data: {
+                name: name,
+            },
+            include: {
+                products: true
+            }
+        });
+        return Promise.resolve(new VendingMachineDto(vendingMachine));
+    }
 }

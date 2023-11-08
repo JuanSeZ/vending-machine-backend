@@ -1,6 +1,7 @@
-import {Service} from "@domains/service";
-import {CreateProductDto, ProductDto, VendingMachineDto} from "@domains/dto";
-import {Repository} from "@domains/repository";
+import {Service} from "./service";
+import {CreateProductDto, ProductDto, VendingMachineDto} from "./dto";
+import {Repository} from "./repository";
+
 
 export class ServiceImpl implements Service {
     constructor (private readonly repository: Repository) {}
@@ -14,5 +15,9 @@ export class ServiceImpl implements Service {
 
     getByName(name: string): Promise<VendingMachineDto | null> {
         return this.repository.getByName(name);
+    }
+
+    createVendingMachine(name: string): Promise<VendingMachineDto> {
+        return this.repository.createVendingMachine(name);
     }
 }
