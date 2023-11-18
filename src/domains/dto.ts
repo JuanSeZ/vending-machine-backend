@@ -1,4 +1,5 @@
-import {Product, VendingMachine} from "@prisma/client";
+import { VendingMachine} from "@prisma/client";
+import {ProductModel, VendingMachineModel} from "@model/model";
 
 export class CreateProductDto {
     name: string;
@@ -15,25 +16,29 @@ export class CreateProductDto {
 }
 
 export class ProductDto {
-    constructor(product: Product) {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+
+    constructor(product:  ProductModel) {
         this.id = product.id;
         this.name = product.name;
         this.price = product.price;
         this.quantity = product.quantity;
     }
 
-    id: string;
-    name: string;
-    price: number;
-    quantity: number;
+    static createFromProduct(product:  ProductModel): ProductDto {
+        return new ProductDto(product);
+    }
 }
-
 export class VendingMachineDto {
-    constructor(vendingMachine: VendingMachineDto) {
+    constructor(vendingMachine: VendingMachineModel) {
         this.id = vendingMachine.id;
         this.name = vendingMachine.name;
-        this.products = vendingMachine.products;
+        this.products = vendingMachine.products.map(product => ProductDto.createFromProduct(product));
     }
+
 
     id: string;
     name: string;
