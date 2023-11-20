@@ -5,14 +5,12 @@ export interface ProductModel extends Document {
     name: string;
     price: number;
     quantity: number;
-    vendingMachineId: string;
 }
 
 const productSchema = new Schema<ProductModel>({
     name: { type: String, required: true, unique: true },
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
-    vendingMachineId: { type: String, required: true },
 });
 
 const Product = mongoose.model<ProductModel>('Product', productSchema);
