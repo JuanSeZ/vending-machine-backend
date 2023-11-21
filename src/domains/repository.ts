@@ -1,4 +1,4 @@
-import {CreateProductDto, ProductDto, VendingMachineDto} from "./dto";
+import {CreateProductDto, HistoryDto, ProductDto, VendingMachineDto} from "./dto";
 
 export interface Repository {
     createProduct: (data: CreateProductDto) => Promise<ProductDto>;
@@ -8,4 +8,5 @@ export interface Repository {
     deleteVendingMachine: (name: string) => Promise<void>;
     restockVendingMachine: (name: string) => Promise<VendingMachineDto>;
     deleteProduct: (vendingMachineName: string, productName: string) =>  Promise<VendingMachineDto>;
+    getHistory: (vendingMachineName: string) => Promise<HistoryDto>;
 }

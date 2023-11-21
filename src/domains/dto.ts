@@ -1,5 +1,4 @@
-import { VendingMachine} from "@prisma/client";
-import {ProductModel, VendingMachineModel} from "@model/model";
+import {HistoryModel, ProductHistoryModel, ProductModel, VendingMachineModel} from "@model/model";
 
 export class CreateProductDto {
     name: string;
@@ -43,5 +42,35 @@ export class VendingMachineDto {
     id: string;
     name: string;
     products: ProductDto[];
+    credit = 0;
+}
+
+export class ProductHistoryDto {
+    name: string;
+    price: number;
+    quantitySold: number;
+
+    constructor(name: string, price: number, quantitySold: number) {
+        this.name = name;
+        this.price = price;
+        this.quantitySold = quantitySold;
+    }
+
+    static createFromProductHistory(product: ProductHistoryModel) {
+        return new ProductHistoryDto(product.name, product.price, product.quantitySold);
+    }
+}
+
+export class HistoryDto {
+    constructor(history: HistoryModel) {
+        this.id = history.id;
+        this.name = history.name;
+        this.products = history.products.map(product => ProductHistoryDto.createFromProductHistory(product));
+    }
+
+    id: string;
+    name: string;
+    products: ProductHistoryDto[];
+    totalIncome = 0;
 }
 

@@ -4,18 +4,20 @@ import {Service} from "./service";
 import {ServiceImpl} from "./service.impl";
 import {RepositoryImpl} from "./repository.impl";
 import mongoose from "mongoose";
+import {startMosquitto} from "../domains/mosquitto";
 
 
 export const router = Router()
 
 startMongoose().then(() => {
     console.log('Connected to database')
-    const service: Service = new ServiceImpl(new RepositoryImpl())
-
+    const service = new ServiceImpl(new RepositoryImpl())
+    startMosquitto(service)
 
     router.get('/', async (req: Request, res: Response) => {
 
         const posts = await service.getAll();
+
         return res.status(HttpStatus.OK).json(posts)
 
     })
@@ -60,11 +62,19 @@ startMongoose().then(() => {
         return res.status(HttpStatus.CREATED).json(vendingMachineDto)
     })
 
+    router.get('/history/:vendingMachineName', async (req: Request, res: Response) => {
+        const {vendingMachineName} = req.params
+
+        const historyDto = await service.getHistory(vendingMachineName)
+
+        return res.status(HttpStatus.OK).json(historyDto)
+    })
+
 
 }).catch((err) => {
     console.log(err)
     process.exit(1)
 });
 async function startMongoose() {
-    await mongoose.connect(process.env.DATABSE_URL || 'mongodb://admin:admin@107.21.196.254:27017/vending-machine-db');
+    await mongoose.connect(process.env.DATABSE_URL || 'mongodb://admin:admin@34.195.207.161:27017/vending-machine-db');
 }

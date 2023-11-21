@@ -1,4 +1,3 @@
-// mongooseModels.ts
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ProductModel extends Document {
@@ -30,3 +29,33 @@ const vendingMachineSchema = new Schema<VendingMachineModel>({
 const VendingMachine = mongoose.model<VendingMachineModel>('VendingMachine', vendingMachineSchema);
 
 export { VendingMachine };
+
+export interface ProductHistoryModel extends Document {
+    name: string;
+    price: number;
+    quantitySold: number;
+}
+
+const productHistorySchema = new Schema<ProductHistoryModel>({
+    name: { type: String, required: true },
+    price: { type: Number, required: true },
+    quantitySold: { type: Number, required: true },
+});
+
+const ProductHistory = mongoose.model<ProductHistoryModel>('ProductHistory', productHistorySchema);
+
+export { ProductHistory };
+
+export interface HistoryModel extends Document {
+    name: string;
+    products: ProductHistoryModel[];
+}
+
+const historySchema = new Schema<HistoryModel>({
+    name: { type: String, required: true, unique: true },
+    products: [{ type: Schema.Types.ObjectId, ref: 'ProductHistory' }],
+});
+
+const History = mongoose.model<HistoryModel>('History', historySchema);
+
+export { History };

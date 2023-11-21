@@ -1,7 +1,7 @@
 import { Repository } from "./repository";
 import {Model, Promise} from "mongoose";
-import { CreateProductDto, ProductDto, VendingMachineDto } from "./dto";
-import { Product, ProductModel, VendingMachine, VendingMachineModel } from '../model/model';
+import {CreateProductDto, HistoryDto, ProductDto, VendingMachineDto} from "./dto";
+import {History, Product, ProductHistory, ProductModel, VendingMachine, VendingMachineModel} from '../model/model';
 
 
 
@@ -89,11 +89,57 @@ export class RepositoryImpl implements Repository {
             { vendingMachineId: vendingMachine._id }
         );
 
+        // Step 5: Create History
+
+        const productHistory = await ProductHistory.insertMany([
+            {
+                name: "Ibuprofen",
+                price: 80,
+                quantitySold: 0,
+            },
+            {
+                name: "Aspirin",
+                price: 70,
+                quantitySold: 0,
+            },
+            {
+                name: "Diphemhydramine",
+                price: 90,
+                quantitySold: 0,
+            },
+            {
+                name: "Paracetamol",
+                price: 50,
+                quantitySold: 0,
+            },
+            {
+                name: "Pepto Bismol",
+                price: 60,
+                quantitySold: 0,
+            },
+        ]);
+
+        const productHistoryIds = productHistory.map((product) => product._id);
+
+        const history = await History.create({
+            name: name,
+            products: productHistoryIds,
+        });
+
+        await ProductHistory.updateMany(
+            { _id: { $in: productHistoryIds } },
+            { historyId: history._id }
+        );
+
         return new VendingMachineDto(vendingMachine);
     }
 
     async deleteVendingMachine(name: string): Promise<void> {
         await VendingMachine.deleteMany();
+        await Product.deleteMany();
+        await History.deleteMany();
+        await ProductHistory.deleteMany();
+        return;
     }
 
     async restockVendingMachine(name: string): Promise<VendingMachineDto> {
@@ -125,9 +171,30 @@ export class RepositoryImpl implements Repository {
                     }
                 }
             });
+            const history = await History.findOne({name: vendingMachineName}).exec();
+            if (history) {
+                history.products.forEach(async (product) => {
+                    if (product.name === productName) {
+                            await ProductHistory.updateOne(
+                                { _id: product },
+                                { quantity: product.quantitySold + 1 }
+                            );
+                        }
+                    });
+            }
             return new VendingMachineDto(vendingMachine);
         }
         return Promise.resolve(null);
     }
 
+    async getHistory(vendingMachineName: string): Promise<HistoryDto> {
+        const vendingMachine = await VendingMachine.findOne({name: vendingMachineName}).exec();
+        if (vendingMachine) {
+            const history = await History.findOne({name: vendingMachineName}).exec();
+            if (history) {
+                return new HistoryDto(history);
+            }
+        }
+        return Promise.resolve(null);
+    }
 }

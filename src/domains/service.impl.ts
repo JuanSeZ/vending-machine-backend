@@ -1,5 +1,5 @@
 import {Service} from "./service";
-import {CreateProductDto, ProductDto, VendingMachineDto} from "./dto";
+import {CreateProductDto, HistoryDto, ProductDto, VendingMachineDto} from "./dto";
 import {Repository} from "./repository";
 import {Promise} from "mongoose";
 
@@ -12,8 +12,12 @@ export class ServiceImpl implements Service {
         return this.repository.createProduct(data);
     }
 
-    getAll(): Promise<VendingMachineDto[]> {
-        return this.repository.getAll();
+    async getAll(): Promise<VendingMachineDto[]> {
+        const vendingMachines = await this.repository.getAll();
+        vendingMachines.forEach(vendingMachine => {
+            vendingMachine.credit = this.credit;
+        });
+        return vendingMachines;
     }
 
     getByName(name: string): Promise<VendingMachineDto | null> {
@@ -26,7 +30,7 @@ export class ServiceImpl implements Service {
 
     async deleteVendingMachine(name: string): Promise<void> {
         await this.repository.deleteVendingMachine(name);
-        return
+        return;
     }
 
     restockVendingMachine(name: string): Promise<VendingMachineDto> {
@@ -35,5 +39,21 @@ export class ServiceImpl implements Service {
 
     deleteProduct(vendingMachineName: string, productName: string): Promise<VendingMachineDto> {
         return this.repository.deleteProduct(vendingMachineName, productName);
+    }
+
+    async getHistory(vendingMachineName: string): Promise<HistoryDto> {
+        const history = await this.repository.getHistory(vendingMachineName);
+        if (history) {
+            history.totalIncome = this.calculateTotalIncome(history);
+        }
+        return history;
+    }
+
+    private calculateTotalIncome(history: HistoryDto): number {
+        let totalIncome = 0;
+        history.products.forEach(product => {
+            totalIncome += product.quantitySold * product.price;
+        });
+        return totalIncome;
     }
 }
