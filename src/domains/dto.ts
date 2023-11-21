@@ -46,18 +46,20 @@ export class VendingMachineDto {
 }
 
 export class ProductHistoryDto {
+    id: string;
     name: string;
     price: number;
     quantitySold: number;
 
-    constructor(name: string, price: number, quantitySold: number) {
-        this.name = name;
-        this.price = price;
-        this.quantitySold = quantitySold;
+    constructor(product: ProductHistoryModel) {
+        this.id = product.id;
+        this.name = product.name;
+        this.price = product.price;
+        this.quantitySold = product.quantitySold;
     }
 
     static createFromProductHistory(product: ProductHistoryModel) {
-        return new ProductHistoryDto(product.name, product.price, product.quantitySold);
+        return new ProductHistoryDto(product);
     }
 }
 

@@ -37,8 +37,18 @@ export class ServiceImpl implements Service {
         return this.repository.restockVendingMachine(name);
     }
 
-    deleteProduct(vendingMachineName: string, productName: string): Promise<VendingMachineDto> {
-        return this.repository.deleteProduct(vendingMachineName, productName);
+    async deleteProduct(vendingMachineName: string, productName: string): Promise<VendingMachineDto> {
+        const product = await this.repository.getProductByName(productName);
+        if (product) {
+            if (this.credit >= product.price) {
+                this.credit -= product.price;
+                return this.repository.deleteProduct(vendingMachineName, productName);
+            }
+        }
+        return await this.getAll().then(vendingMachines => {
+            return vendingMachines.find(vendingMachine => vendingMachine.name === vendingMachineName);
+        }
+        ) as VendingMachineDto;
     }
 
     async getHistory(vendingMachineName: string): Promise<HistoryDto> {

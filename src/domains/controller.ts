@@ -65,7 +65,7 @@ startMongoose().then(() => {
     router.get('/history/:vendingMachineName', async (req: Request, res: Response) => {
         const {vendingMachineName} = req.params
 
-        const historyDto = await service.getHistory(vendingMachineName)
+        const historyDto = await service.getHistory("Vending Machine")
 
         return res.status(HttpStatus.OK).json(historyDto)
     })

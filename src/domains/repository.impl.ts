@@ -45,31 +45,25 @@ export class RepositoryImpl implements Repository {
             {
                 name: "Ibuprofen",
                 price: 80,
-                quantity: 10,
-                vendingMachineId: null, // Provide a default value or handle this according to your logic
-            },
-            {
-                name: "Aspirin",
-                price: 70,
-                quantity: 10,
+                quantity: 5,
                 vendingMachineId: null,
             },
             {
                 name: "Diphemhydramine",
                 price: 90,
-                quantity: 10,
+                quantity: 5,
                 vendingMachineId: null,
             },
             {
                 name: "Paracetamol",
                 price: 50,
-                quantity: 10,
+                quantity: 5,
                 vendingMachineId: null,
             },
             {
                 name: "Pepto Bismol",
                 price: 60,
-                quantity: 10,
+                quantity: 5,
                 vendingMachineId: null,
             },
         ]);
@@ -95,11 +89,6 @@ export class RepositoryImpl implements Repository {
             {
                 name: "Ibuprofen",
                 price: 80,
-                quantitySold: 0,
-            },
-            {
-                name: "Aspirin",
-                price: 70,
                 quantitySold: 0,
             },
             {
@@ -148,7 +137,7 @@ export class RepositoryImpl implements Repository {
             vendingMachine.products.forEach(async (product) => {
                 await Product.updateOne(
                     { _id: product },
-                    { quantity: 10 }
+                    { quantity: 5 }
                 );
             });
          return new VendingMachineDto(vendingMachine);
@@ -162,7 +151,7 @@ export class RepositoryImpl implements Repository {
         //      Reduce the quantity of the product by 1
             vendingMachine.products.forEach(async (product) => {
                 const productModel = await Product.findById(product).exec();
-                if (productModel && productModel.name === productName) {
+                if (productModel && productModel.name == productName) {
                     if (productModel.quantity > 0) {
                         await Product.updateOne(
                             { _id: product },
@@ -171,13 +160,20 @@ export class RepositoryImpl implements Repository {
                     }
                 }
             });
-            const history = await History.findOne({name: vendingMachineName}).exec();
+            const history = await History.findOne({name: vendingMachineName})
+                .populate("products")
+                .exec();
+            console.log(history)
             if (history) {
                 history.products.forEach(async (product) => {
-                    if (product.name === productName) {
+                    console.log(product)
+                    console.log(product.name)
+                    console.log(productName)
+                    console.log(product.name == productName)
+                    if (product.name == productName) {
                             await ProductHistory.updateOne(
                                 { _id: product },
-                                { quantity: product.quantitySold + 1 }
+                                { quantitySold: product.quantitySold + 1 }
                             );
                         }
                     });
@@ -190,11 +186,22 @@ export class RepositoryImpl implements Repository {
     async getHistory(vendingMachineName: string): Promise<HistoryDto> {
         const vendingMachine = await VendingMachine.findOne({name: vendingMachineName}).exec();
         if (vendingMachine) {
-            const history = await History.findOne({name: vendingMachineName}).exec();
+            const history = await History.findOne({name: vendingMachineName})
+                .populate("products")
+                .exec();
             if (history) {
                 return new HistoryDto(history);
             }
         }
         return Promise.resolve(null);
+    }
+
+    async getProductByName(name: string): Promise<ProductDto | null> {
+        const product = await Product.findOne({name: name})
+            .exec();
+        if (product) {
+            return new ProductDto(product);
+        }
+        return null;
     }
 }

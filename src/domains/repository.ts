@@ -9,4 +9,5 @@ export interface Repository {
     restockVendingMachine: (name: string) => Promise<VendingMachineDto>;
     deleteProduct: (vendingMachineName: string, productName: string) =>  Promise<VendingMachineDto>;
     getHistory: (vendingMachineName: string) => Promise<HistoryDto>;
+    getProductByName: (name: string) => Promise<ProductDto | null>;
 }
